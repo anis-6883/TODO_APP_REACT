@@ -1,8 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+
+const getTodos = () => {
+  let todos = localStorage.getItem("todos");
+  if (todos) {
+    return JSON.parse(todos);
+  }
+  return [];
+};
 
 function Todo() {
   const [input, setInput] = useState("");
-  const [todos, setTodos] = useState([]);
+  const [todos, setTodos] = useState(getTodos());
   const [toggleBtn, setToggleBtn] = useState(false);
   const [editId, setEditId] = useState(null);
 
@@ -56,6 +64,10 @@ function Todo() {
     setTodos([]);
   };
 
+  useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(todos));
+  }, [todos]);
+
   return (
     <div className="container">
       <h1 className="text-center mt-5">Todo App With React</h1>
@@ -75,7 +87,7 @@ function Todo() {
                       id="todo"
                       className="form-control"
                       placeholder="Enter Todo..."
-                      maxLength={50}
+                      maxLength={70}
                       autoFocus
                       autoComplete="off"
                       value={input}
@@ -112,8 +124,11 @@ function Todo() {
           <div className="col-md-8 m-auto">
             {todos.length !== 0 ? (
               <button className="btn btn-danger mb-2" onClick={removeAllTodos}>
-                <i style={{ fontSize: "18px" }} className="fa me-1">
-                  &#xf06d;
+                <i
+                  style={{ fontSize: "18px", color: "#000" }}
+                  className="fa me-1"
+                >
+                  &#xf1e2;
                 </i>
                 Remove All
               </button>
