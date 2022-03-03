@@ -3,18 +3,51 @@ import React, { useState } from "react";
 function Todo() {
   const [input, setInput] = useState("");
   const [todos, setTodos] = useState([]);
+  const [toggleBtn, setToggleBtn] = useState(false);
+  const [editId, setEditId] = useState(null);
 
-  const addTodo = (e) => {
+  function getRndInteger(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  const manageTodo = (e) => {
     e.preventDefault();
-    if (input) {
-      setTodos([...todos, input]);
+
+    if (!input) {
+      alert("Don't save any empty todo!");
+    } else if (input && toggleBtn) {
+      setTodos(
+        todos.map((todo) => {
+          if (todo.id === editId) {
+            return { ...todo, title: input };
+          }
+          return todo;
+        })
+      );
+      setToggleBtn(false);
+      setInput("");
+      setEditId(null);
+    } else {
+      let id = `${getRndInteger(100000000000000, 999999999999999)}`;
+
+      const todo = { id, title: input };
+      setTodos([...todos, todo]);
       setInput("");
     }
   };
 
-  const deleteTodo = (i) => {
-    const updateTodos = todos.filter((todo, idx) => {
-      return idx !== i;
+  const editTodo = (id) => {
+    const findTodo = todos.find((todo) => {
+      return todo.id === id;
+    });
+    setToggleBtn(true);
+    setInput(findTodo.title);
+    setEditId(id);
+  };
+
+  const deleteTodo = (id) => {
+    const updateTodos = todos.filter((todo) => {
+      return todo.id !== id;
     });
     setTodos(updateTodos);
   };
@@ -34,7 +67,7 @@ function Todo() {
               <label htmlFor="todo" className="form-label">
                 <b>✅ Add Todo Here</b>
               </label>
-              <form onSubmit={addTodo}>
+              <form onSubmit={manageTodo}>
                 <div className="row">
                   <div className="col-md-10 m-auto">
                     <input
@@ -50,12 +83,21 @@ function Todo() {
                     />
                   </div>
                   <div className="col-md-2 m-auto">
-                    <button type="submit" className="btn btn-info">
-                      <i style={{ fontSize: "18px" }} className="fa me-1">
-                        &#xf1d9;
-                      </i>
-                      Add Todo
-                    </button>
+                    {!toggleBtn ? (
+                      <button type="submit" className="btn btn-info">
+                        <i style={{ fontSize: "18px" }} className="fa me-1">
+                          &#xf1d9;
+                        </i>
+                        Add Todo
+                      </button>
+                    ) : (
+                      <button type="submit" className="btn btn-warning">
+                        <i style={{ fontSize: "18px" }} className="fa me-1">
+                          &#xf044;
+                        </i>
+                        Edit Todo
+                      </button>
+                    )}
                   </div>
                 </div>
               </form>
@@ -68,20 +110,20 @@ function Todo() {
       <div className="container mt-2 mb-1">
         <div className="row">
           <div className="col-md-8 m-auto">
-            {todos.length != 0 ? (
-              <buton className="btn btn-danger mb-2" onClick={removeAllTodos}>
+            {todos.length !== 0 ? (
+              <button className="btn btn-danger mb-2" onClick={removeAllTodos}>
                 <i style={{ fontSize: "18px" }} className="fa me-1">
                   &#xf06d;
                 </i>
                 Remove All
-              </buton>
+              </button>
             ) : null}
 
             <ul className="list-group">
-              {todos.map((todo, idx) => {
+              {todos.map((todo) => {
                 return (
                   <li
-                    key={idx}
+                    key={todo.id}
                     className="mb-2 list-group-item list-group-item-primary d-flex justify-content-between align-items-center"
                   >
                     <div>
@@ -89,11 +131,14 @@ function Todo() {
                         className="form-check-input me-3"
                         type="checkbox"
                       />
-                      {todo}
+                      {todo.title}
                     </div>
 
                     <div className="d-flex">
-                      <button className="btn btn-warning btn-sm">
+                      <button
+                        className="btn btn-warning btn-sm"
+                        onClick={() => editTodo(todo.id)}
+                      >
                         <i style={{ fontSize: "18px" }} className="fa me-1">
                           &#xf044;
                         </i>
@@ -101,7 +146,7 @@ function Todo() {
                       </button>
                       <button
                         className="btn btn-danger btn-sm ms-2"
-                        onClick={() => deleteTodo(idx)}
+                        onClick={() => deleteTodo(todo.id)}
                       >
                         <i style={{ fontSize: "18px" }} className="fa me-1">
                           &#xf014;
